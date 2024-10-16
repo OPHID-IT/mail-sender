@@ -53,27 +53,75 @@ public class EmailService {
             return false; // Failed to send email
         }
     }
-    @Scheduled(fixedDelay = 3000) //
+    @Scheduled(fixedDelay = 3000)
     public void cronEmailSender() {
+        List<Email> emails = getAllEmailsForSending();
+        System.out.println("------->Emails to be sent are totaling ::" + emails.size());
+
+        for (Email em : emails) {
+            boolean emailSent;
+
+            // Check if copies are present
+            if (em.getCopy() != null && !em.getCopy().isEmpty()) {
+                String[] copies = em.getCopy().split(";");
+                emailSent = sendMail(em.getRecipient(), em.getBody(), em.getSubject(), copies);
+            } else {
+                // No copies, send without them
+                emailSent = sendMail(em.getRecipient(), em.getBody(), em.getSubject(), null);
+            }
+
+            if (emailSent) {
+                int resultOnUpdate = emailServiceDAL.updateStatus(em.getId());
+                System.out.println("---------> S");
+                if (resultOnUpdate > 0) {
+                    log.info("---------->Success in updating the status of email sent");
+                } else {
+                    log.error("---------->ERROR in updating the status of email sent");
+                }
+            } else {
+                log.error("---------->ERROR in sending the Email");
+            }
+        }
+    }
+    @Scheduled(fixedDelay = 3000)
+    public void cronEmailSender2() {
 
         List<Email> emails = getAllEmailsForSending();
         System.out.println("------->Emails to be sent are totalling ::"+emails.size());
         for (Email em : getAllEmailsForSending()) {
-            String[] copies = em.getCopy().split(";");
+            if(em.getCopy() != null && em.getCopy().isEmpty()) {
+                String[] copies = em.getCopy().split(";");
+                if (sendMail(em.getRecipient(), em.getBody(), em.getSubject(), copies)) {
+                    int resultOnUpdate = emailServiceDAL.updateStatus(em.getId());
+                    System.out.println("---------> S");
+                    if(resultOnUpdate>0){
+                        log.info("---------->Success in updating the status of email sent ");
+                    }else{
+                        log.error("---------->ERROR in updating the status of email sent ");
+                    }
 
-            if (sendMail(em.getRecipient(), em.getBody(), em.getSubject(), copies)) {
-                int resultOnUpdate = emailServiceDAL.updateStatus(em.getId());
-                System.out.println("---------> S");
-                if(resultOnUpdate>0){
-                    log.info("---------->Success in updating the status of email sent ");
-                }else{
-                    log.error("---------->ERROR in updating the status of email sent ");
+
+                } else {
+                    log.error("---------->ERROR in sending the Email");
+                }
+            } else{
+                String[] copies = em.getCopy().split(";");
+                if (sendMail(em.getRecipient(), em.getBody(), em.getSubject(), copies)) {
+                    int resultOnUpdate = emailServiceDAL.updateStatus(em.getId());
+                    System.out.println("---------> S");
+                    if(resultOnUpdate>0){
+                        log.info("---------->Success in updating the status of email sent ");
+                    }else{
+                        log.error("---------->ERROR in updating the status of email sent ");
+                    }
+
+
+                } else {
+                    log.error("---------->ERROR in sending the Email");
                 }
 
-
-            } else {
-                log.error("---------->ERROR in sending the Email");
             }
+
 
         }
 

@@ -29,10 +29,7 @@ public class JdbcConfig {
         dataSource.setUrl(url);
         dataSource.setUsername(username);
         dataSource.setPassword(password);
-//        dataSource.setDriverClassName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-//        dataSource.setUrl("jdbc:sqlserver://appsaas.southafricanorth.cloudapp.azure.com:14575;databaseName="+databaseName+";encrypt=true;trustServerCertificate=true;");
-//        dataSource.setUsername("payer");
-//        dataSource.setPassword("P@y3r@2020");
+
         return dataSource;
     }
 
